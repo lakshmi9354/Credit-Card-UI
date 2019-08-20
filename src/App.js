@@ -15,7 +15,7 @@ import Payment from './Components/Payment/Payment';
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>     
+      <HashRouter>     
         <Header/> 
         {/* <Route path='/login' exact component={Login}></Route>
         <Route path='/logout' exact component={Logout}></Route> */}
@@ -29,7 +29,7 @@ function App() {
         <Route path='/transactionhistory' exact component={TransactionHistory}></Route>
         <Route path='/cardStatement' exact component={CardStatement}></Route>
         <Route path='/' exact component={Registration}></Route>
-    </BrowserRouter>
+    </HashRouter>
     </div>
   );
 }
