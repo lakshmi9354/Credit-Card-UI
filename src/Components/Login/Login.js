@@ -28,9 +28,11 @@ export class Login extends Component {
             axios.post(`${url.url}/login`, user)
                 .then(res => {
                     console.log("My response", res)
-                    if (res.status === 200 ) {
+                    if (res.status === 200 && res.data.status==='SUCCESS') {
                         resolve(res.data)
+
                     } else {
+                        alert(res.data.message)
                     }
                 }).catch((err) => {
                     alert("Error in Login", err)
@@ -48,15 +50,12 @@ export class Login extends Component {
                 };
                 this.getData(user).then((res)=>{
                     if(res){
-                        console.log("res inside login",res)
-                        let accountId=res.accountId;
-                        console.log("accountId frm login", accountId)
-                        localStorage.setItem('isLoggedIn', true)
-                        localStorage.setItem('accountId',accountId)
+                        console.log(res.data)
+                        
                         this.props.history.push({
                             pathname: '/accountSummary',
                             search: '?query=accountSummary',
-                            //state:{data: response.data}
+                            state:{data: res.data.userId}
                         })
                     }
                 }).catch(err=>{
@@ -69,10 +68,8 @@ export class Login extends Component {
 
             }
         })
-
     }   
    
- 
     validate() {
         console.log("Inside validate")
         let isValid = false;
@@ -108,7 +105,7 @@ export class Login extends Component {
                     <div className="form-group">
                         <span className="pull-right text-danger"><small>{this.state.mobileNoError}</small></span>
                         <br></br>
-                        <label htmlFor="mobileNo">AccountNo/MobileNo</label><br></br>
+                        <label htmlFor="mobileNo">MobileNo</label><br></br>
                         <input
                             type="text"
                             id="mobileNo"

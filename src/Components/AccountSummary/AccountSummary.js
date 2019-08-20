@@ -7,12 +7,12 @@ export class AccountSummary extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            name: '',
-            email: '',
-            mobileNo: '',
-            accountType: '',
-            accountNo: '',
-            balance:''
+            name: 'Darsana',
+            email: 'Darsana.M@hcl.com',
+            mobileNo: '8861977885',
+            accountType: 'Current',
+            accountNo: '12345678',
+            balance:'10000'
         }
     }
     componentDidMount(prevProps, prevState) {

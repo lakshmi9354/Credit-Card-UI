@@ -11,6 +11,7 @@ import FundTransfer from './Components/FundTransfer/FundTransfer';
 import TransactionHistory from './Components/TransactionHistory/TransactionHistory';
 import Logout from './Components/Logout/Logout';
 import CardStatement from './Components/CardStatement/CardStatement';
+import Payment from './Components/Payment/Payment';
 function App() {
   return (
     <div className="App">
@@ -21,6 +22,7 @@ function App() {
         <Route path='/login' exact component={Login}></Route>
         <Route path='/logout' exact component={Logout}></Route>
         <Route path='/addPayee' exact component={AddPayee}></Route>
+        <Route path='/payment' exact component={Payment}></Route>
          <Route path='/accountSummary' exact component={AccountSummary}></Route>
         <Route path='/confirmation' exact component={Confirmation}></Route>
         <Route path='/fundtransfer' exact component={FundTransfer}></Route>

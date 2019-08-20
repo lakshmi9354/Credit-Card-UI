@@ -1,53 +1,103 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import './AddPayee.css'
+import isLuhn from 'node-luhn'
+import './Payment.css'
 import url from '../../config.json'
-import axios from 'axios';
+
+
 export class Payment extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            accountNumber: '',
-            accountNumberError: '',
-            mobileNo: '',
-            mobileNoError: '',
-            name: '',
-            nameError: '',
-            email: '',
-            emailError: '',
-            isValid: '',
+            creditCardNumber: '',
+            creditCardNumberError: '',
+            amount: '',
+            amountError: '',
+            expiryDate: '',
+            expiryDateError: '',
+            cvv: '',
+            cvvError: '',
+            reason: '',
+            reasonError: '',
+            cardType: '',
+            cardTypeError: '',
             otpGenInit: false,
-            otp: '',
-            payeeList: [{
-                'name': 'Darsana',
-                'accountNumber': '3123123',
-                'email': 'darsana@gmail.com',
-                'mobileNo': 8861977885,
-                'accountType': 'Savings'
-            }, {
-                'name': 'Deepthi',
-                'accountNumber': '123456',
-                'email': 'deepthi@gmail.com',
-                'mobileNo': 9901666911,
-                'accountType': 'Current'
-            }]
+            isValid: false
+
         }
         this.handleChange = this.handleChange.bind(this)
-        this.handleAddPayee = this.handleAddPayee.bind(this);
-        this.handleEditPayee = this.handleEditPayee.bind(this);
-        this.handleDeletePayee = this.handleDeletePayee.bind(this);
-        this.handleVerifyOTP = this.handleVerifyOTP.bind(this);
-        this.setAccountType = this.setAccountType.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
 
-    handleEditPayee(e) {
+    validate() {
+        return new Promise((resolve, reject)=>{
+            console.log("Inside validate")
+        let isValid = false;
+        const errors = {
+            creditCardNumberError: '',
+        }
+        if (this.state.amount <=0){
+            isValid=false;
+            errors.amountError="Amount cant be negative or zero"
+        }
+        if (this.state.creditCardNumber.length === 16) {
+            if (isLuhn(this.state.creditCardNumber)) {
+                console.log("Is LUHN satisfied", isLuhn(this.state.creditCardNumber))
+                isValid=true;
+            } else {
+                console.log("Invalid credit card number.")
+                isValid = false;
+                errors.creditCardNumberError = 'Invalid credit card number.'
+            }
+        } else {
+            console.log("Credit card numnber should be 16 digits")
+            isValid = false;
+            errors.creditCardNumberError = 'Credit card numnber should be 16 digits'
+        }
 
-        console.log("edit payee", this.state.name)
-    }
-    handleDeletePayee() {
+        this.setState({
+            ...this.state,
+            ...errors
+        })
+         return resolve(isValid);
 
+        })
+        
     }
+
+    handleSubmit(e) {
+        e.preventDefault()
+        this.validate().then((res) => {
+            if (res) {
+                const paymentDetails = {
+                    amount: this.state.amount,
+                    creditCardNumber: this.state.creditCardNumber,
+                    expiryDate: this.state.expiryDate,
+                    cvv: this.state.cvv,
+                    reason: this.state.reason,
+                    cardType: this.state.cardType
+                };
+                this.getData(paymentDetails).then((res) => {
+                    if (res) {
+                        console.log(res.data)
+                        if (res.status === "200" && res.data.status === "SUCCESS") {
+                            this.setState({
+                                otpGenInit: true
+                            })
+                        } else {
+                            alert(res.data.message)
+                        }
+                    }
+                }).catch(err => {
+                    alert('Error in payment', err)
+                })
+            }
+            else {
+            }
+        })
+    }
+
     handleVerifyOTP() {
         axios.get(`${url.url}/otpVerification/${this.state.otp}`)
             .then(res => {
@@ -69,10 +119,10 @@ export class Payment extends Component {
             //console.log(this.state)
         })
     }
-    getData(fields) {
-        console.log("getdata", fields)
+    getDataVisa(fields) {
+        console.log("getdataVisa", fields)
         return new Promise((resolve, reject) => {
-            axios.get(`${url}/payee`)
+            axios.post(`${url}/paymentVisa`)
                 .then(res => {
                     resolve(res)
                 }).catch((err) => {
@@ -82,18 +132,20 @@ export class Payment extends Component {
 
         })
     }
-    componentDidMount() {
-        let accountId=localStorage.getItem('accountId')
-        console.log("accountId",accountId)
-        axios.get(`${url}/payee`)
-            .then(res => {
-                this.setState({
-                    payeeList: res.data.payeeList
+    getDataMaster(fields) {
+        console.log("getdataMaster", fields)
+        return new Promise((resolve, reject) => {
+            axios.post(`${url}/paymentMaster`)
+                .then(res => {
+                    resolve(res)
+                }).catch((err) => {
+                    reject(err);
+                    alert("Error in search", err)
                 })
-            }).catch((err) => {
-                console.log('Error in getting payee list')
-            })
+
+        })
     }
+
     handleAddPayee(e) {
         console.log("Inside handle add payee")
         e.preventDefault()
@@ -118,212 +170,73 @@ export class Payment extends Component {
             })
 
     }
-    validate() {
-        return Promise.resolve(true);
-    }
     render() {
         return (
 
             <div>
-                <h1 className="headingpayee">AddPayee</h1>
+                <h1 className="headingpayee">Make Payment</h1>
                 {
-                    this.state.payeeList !== '' ? (
-                        <div>
-                            <form className="searchprofileform">
-                                <span className="pull-right text-danger"><small>{this.state.accountNumberError}</small></span>
-                                <div className="form-group col-xs-3">
-                                    <label htmlFor="accountNumber">Account Number  </label><br></br>
-                                    <input name=""
-                                        className="form-control"
-                                        placeholder="Account Number"
-                                        type="text"
-                                        value={this.state.accountNumber}
-                                        id="accountNumber"
-                                        onChange={this.handleChange} />
-                                </div>
-                                <span className="pull-right text-danger"><small>{this.state.mobileNoError}</small></span>
-                                <div className="form-group col-xs-3">
-                                    <label htmlFor="mobileNo">Mobile Number  </label><br></br>
-                                    <input name=""
-                                        className="form-control"
-                                        placeholder="MobileNo"
-                                        type="text"
-                                        id="mobileNo"
-                                        value={this.state.mobileNo}
-                                        onChange={this.handleChange}
-                                    />
-                                </div>
-                                <span className="pull-right text-danger"><small>{this.state.nameError}</small></span>
-                                <div className="form-group col-xs-3">
-                                    <label htmlFor="mobileNo">Name  </label><br></br>
-                                    <input name=""
-                                        className="form-control"
-                                        placeholder="name"
-                                        type="text"
-                                        id="name"
-                                        value={this.state.name}
-                                        onChange={this.handleChange}
-                                    />
-                                </div>
-                                <div className="form-group col-xs-3">
-                                    <label htmlFor="mobileNo">Email </label>
-                                    <br></br>
-                                    <input name=""
-                                        className="form-control"
-                                        placeholder="email"
-                                        type="text"
-                                        id="email"
-                                        value={this.state.email}
-                                        onChange={this.handleChange}
-                                    />
-                                </div>
-                                <div onChange={this.setAccountType} className="form-group col-xs-3">
-                                    <label htmlFor="accountType">AccountType   </label>
-                                    <br></br>
-                                    <input
-                                        type="radio"
-                                        id="accountType"
-                                        value="Current"
-                                        className="form-control"
-                                        name="accounttype"
-                                    />
-                                    <label htmlFor="accountType">Current</label>
-                                    <input
-                                        type="radio"
-                                        id="accountType"
-                                        value="Savings"
-                                        name="accounttype"
-                                        className="form-control"
-                                    />
-                                    <label htmlFor="accountType">Savings</label>
-                                </div>
-                                <div className="form-group col-xs-2 ">
-                                    <button type="submit" id="searchsubmit" className="btn btn-primary" onClick={this.handleAddPayee}  >Add Payee </button>&nbsp;&nbsp;
+                    <div>
+                        <form className="makepaymentform">
+                            <span className="pull-right text-danger"><small>{this.state.amountError}</small></span>
+                            <div className="form-group col-xs-3">
+                                <label htmlFor="amount">Amount  </label><br></br>
+                                <input name=""
+                                    className="form-control"
+                                    type="text"
+                                    value={this.state.amount}
+                                    id="amount"
+                                    onChange={this.handleChange} />
+                            </div>
+                            <span className="pull-right text-danger"><small>{this.state.creditCardNumberError}</small></span>
+                            <div className="form-group col-xs-3">
+                                <label htmlFor="creditCardNumber">Credit Card Number  </label><br></br>
+                                <input name=""
+                                    className="form-control"
+                                    type="text"
+                                    value={this.state.creditCardNumber}
+                                    id="creditCardNumber"
+                                    onChange={this.handleChange} />
+                            </div>
+                            <span className="pull-right text-danger"><small>{this.state.expiryDateError}</small></span>
+                            <div className="form-group ">
+                                <label htmlFor="expiryDate">Expiry Date  </label><br></br>
+                                <input
+                                    className="form-control"
+                                    type="text"
+                                    id="expiryDate"
+                                    value={this.state.expiryDate}
+                                    onChange={this.handleChange}
+                                />
+                            </div>
+                            <span className="pull-right text-danger"><small>{this.state.cvvError}</small></span>
+                            <div className="form-group ">
+                                <label htmlFor="cvv">cvv  </label><br></br>
+                                <input name=""
+                                    className="form-control"
+                                    type="password"
+                                    id="cvv"
+                                    value={this.state.cvv}
+                                    onChange={this.handleChange}
+                                />
+                            </div>
+                            <div className="form-group ">
+                                <label htmlFor="reason">Comments </label><br></br>
+                                <input name=""
+                                    className="form-control"
+                                    type="text"
+                                    id="reason"
+                                    value={this.state.reason}
+                                    onChange={this.handleChange}
+                                />
+                            </div>
+                            <br></br><br></br>
+                            <div className="form-group col-xs-2 ">
+                                <button type="submit" id="searchsubmit" className="btn btn-primary" onClick={this.handleSubmit}  >Make Payment</button>&nbsp;&nbsp;
                             </div>
 
-                            </form>
-
-                            {
-                                this.state.otpGenInit ? (
-                                    <div>
-                                        <label htmlFor="otp">Enter the OTP receved in your email</label><br></br>
-
-                                        <input type="password" value={this.state.otp} onChange={this.handleChange} id='otp' />
-                                        <button type="submit" id="searchsubmit" className="btn btn-primary" onClick={this.handleVerifyOTP}  >Verify OTP </button>&nbsp;&nbsp;
-                                            </div>
-                                ) : (
-                                        <div>
-                                        </div>
-                                    )
-                            }
-                            <h1>List of Payees</h1>
-                            <table className="table">
-                                <thead className="tableheading">
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Account Number</th>
-                                        <th scope="col">Email</th>
-                                        <th scope="col">Mobile Number</th>
-                                        <th scope="col">Account Type</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                        this.state.payeeList.map((each, index) => (
-                                            <tr className="datarow" scope="row">
-                                                <td contenteditable="true"> {each.name}</td>
-                                                <td> {each.accountNumber}</td>
-                                                <td> {each.email}</td>
-                                                <td> {each.mobileNo}</td>
-                                                <td> {each.accountType}</td>
-                                                <td>  <button type="submit" id="editPayee" className="btn btn-primary" onClick={this.handleEditPayee}  >Edit</button></td>
-                                                <td>  <button type="submit" id="deletePayee" className="btn btn-primary" onClick={this.handleDeletePayee}  >Delete</button></td>
-                                            </tr>
-                                        ))
-                                    }
-
-                                </tbody>
-                            </table>
-
-                        </div>
-
-                    ) : (
-
-                            <div>
-                                <form className="searchprofileform">
-                                    <span className="pull-right text-danger"><small>{this.state.accountNumberError}</small></span>
-                                    <div className="form-group col-xs-3">
-                                        <label htmlFor="accountNumber">Account Number  </label>
-                                        <input name=""
-                                            className="form-control"
-                                            placeholder="Account Number"
-                                            type="text"
-                                            value={this.state.accountNumber}
-                                            id="accountNumber"
-                                            onChange={this.handleChange} />
-                                    </div>
-                                    <span className="pull-right text-danger"><small>{this.state.mobileNoError}</small></span>
-                                    <div className="form-group ">
-                                        <label htmlFor="mobileNo">Mobile Number  </label>
-                                        <input name=""
-                                            className="form-control"
-                                            placeholder="MobileNo"
-                                            type="text"
-                                            id="mobileNo"
-                                            value={this.state.mobileNo}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
-                                    <span className="pull-right text-danger"><small>{this.state.nameError}</small></span>
-                                    <div className="form-group ">
-                                        <label htmlFor="mobileNo">Name  </label>
-                                        <input name=""
-                                            className="form-control"
-                                            placeholder="name"
-                                            type="text"
-                                            id="name"
-                                            value={this.state.name}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
-                                    <div className="form-group ">
-                                        <label htmlFor="mobileNo">Email </label>
-                                        <input name=""
-                                            className="form-control"
-                                            placeholder="email"
-                                            type="text"
-                                            id="email"
-                                            value={this.state.email}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
-                                    <div onChange={this.setAccountType} className="form-group col-xs-3">
-                                        <label htmlFor="accountType">AccountType   </label>
-
-                                        <input
-                                            type="radio"
-                                            id="accountType"
-                                            value="Current"
-                                            className="form-control"
-                                            name="accounttype"
-                                        />
-                                        <label htmlFor="accountType">Current</label>
-                                        <input
-                                            type="radio"
-                                            id="accountType"
-                                            value="Savings"
-                                            name="accounttype"
-                                            className="form-control"
-                                        />
-                                        <label htmlFor="accountType">Savings</label>
-                                    </div>
-                                    <div className="form-group col-xs-2 ">
-                                        <button type="submit" id="searchsubmit" className="btn btn-primary" onClick={this.handleSubmit}  >Add Payee </button>&nbsp;&nbsp;
-                            </div>
-
-                                </form>
-                            </div>
-                        )
+                        </form>
+                    </div>
                 }
 
             </div>

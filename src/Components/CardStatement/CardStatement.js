@@ -11,19 +11,7 @@ export class CardStatement extends Component {
             transactionFromDateError: '',
             transactionToDate: '',
             transactionToDateError: '',
-            cardStatement: [{
-                'transactionDate': '22-12-1987',
-                'creditCardNumber': 'CCD',
-                'amount': 200,
-                'transactionType': 'Credit',
-                'reason': 'amazon'
-            }, {
-                'transactionDate': '22-12-1987',
-                'creditCardNumber': 'CCD',
-                'amount': 200,
-                'transactionType': 'Credit',
-                'reason': 'amazon'
-            }]
+            cardStatement: []
         }
         this.handleChange = this.handleChange.bind(this)
         this.getStatement =this.getStatement.bind(this);
@@ -83,7 +71,6 @@ export class CardStatement extends Component {
                 isValid = false;
                 errors.transactionFromDateError = 'From Date cannot be today date'
             }
-
 
             this.setState({
                 ...this.state,
