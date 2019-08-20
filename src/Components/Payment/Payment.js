@@ -14,8 +14,8 @@ export class Payment extends Component {
             creditCardNumberError: '',
             amount: '',
             amountError: '',
-            expiryDate: '',
-            expiryDateError: '',
+            expiryDateMonth: '',
+            expiryDateYearError: '',
             cvv: '',
             cvvError: '',
             reason: '',
@@ -23,6 +23,7 @@ export class Payment extends Component {
             cardType: '',
             cardTypeError: '',
             otpGenInit: false,
+            otp: '',
             isValid: false
 
         }
@@ -31,45 +32,65 @@ export class Payment extends Component {
     }
 
     validate() {
-        return new Promise((resolve, reject)=>{
-            console.log("Inside validate")
-        let isValid = false;
-        const errors = {
-            creditCardNumberError: '',
-        }
-        if (this.state.amount <=0){
-            isValid=false;
-            errors.amountError="Amount cant be negative or zero"
-        }
-        if (this.state.creditCardNumber.length === 16) {
+        return new Promise((resolve, reject) => {
+            let isValid = false;
+            const errors = {
+                creditCardNumberError: '',
+            }
+            if (this.state.amount <= 0) {
+                isValid = false;
+                errors.amountError = "Amount cant be negative or zero"
+            } else {
+                isValid = true;
+            }
+            // if (this.state.creditCardNumber.length === 16) {
             if (isLuhn(this.state.creditCardNumber)) {
                 console.log("Is LUHN satisfied", isLuhn(this.state.creditCardNumber))
-                isValid=true;
+                console.log("card", this.state.creditCardNumber.slice(0, 1))
+
+                isValid = true;
             } else {
                 console.log("Invalid credit card number.")
                 isValid = false;
                 errors.creditCardNumberError = 'Invalid credit card number.'
             }
-        } else {
-            console.log("Credit card numnber should be 16 digits")
-            isValid = false;
-            errors.creditCardNumberError = 'Credit card numnber should be 16 digits'
-        }
+            // } else {
+            //     console.log("Credit card number should be 16 digits")
+            //     isValid = false;
+            //     errors.creditCardNumberError = 'Credit card numnber should be 16 digits'
+            // }
 
-        this.setState({
-            ...this.state,
-            ...errors
-        })
-         return resolve(isValid);
+            this.setState({
+                ...this.state,
+                ...errors
+            })
+            console.log()
+            resolve(isValid);
 
         })
-        
+
     }
 
     handleSubmit(e) {
+        console.log("handle submit")
         e.preventDefault()
         this.validate().then((res) => {
+            if (this.state.creditCardNumber.slice(0, 1) === '4') {
+                console.log("cardtyope visa")
+                this.setState({
+                    cardType: "visa"
+                })
+            } else if (this.state.creditCardNumber.slice(0, 1) === '5') {
+                console.log("cardtyope master")
+                this.setState({
+                    cardType: "master"
+                })
+            }
             if (res) {
+                this.setState({
+                    otpGenInit: true
+                })
+                console.log("validate", res)
                 const paymentDetails = {
                     amount: this.state.amount,
                     creditCardNumber: this.state.creditCardNumber,
@@ -78,20 +99,43 @@ export class Payment extends Component {
                     reason: this.state.reason,
                     cardType: this.state.cardType
                 };
-                this.getData(paymentDetails).then((res) => {
-                    if (res) {
-                        console.log(res.data)
-                        if (res.status === "200" && res.data.status === "SUCCESS") {
-                            this.setState({
-                                otpGenInit: true
-                            })
-                        } else {
-                            alert(res.data.message)
+                console.log("cardtype", this.state.cardType)
+                if (this.state.cardType === "visa") {
+                    alert('processing payment with Visa card')
+                    console.log("Inside handle submit visa")
+                    this.getDataVisa(paymentDetails).then((res) => {
+                        if (res) {
+                            console.log(res.data)
+                            if (res.status === "200" && res.data.status === "SUCCESS") {
+                                alert('processing payment with VISA card')
+                                this.setState({
+                                    otpGenInit: true
+                                })
+                            } else {
+                                alert(res.data.message)
+                            }
                         }
-                    }
-                }).catch(err => {
-                    alert('Error in payment', err)
-                })
+                    }).catch(err => {
+                        alert('Error in payment', err)
+                    })
+
+                } else if (this.state.cardType === "master") {
+                    alert('processing payment with Master card')
+                    this.getDataMaster(paymentDetails).then((res) => {
+                        if (res) {
+                            console.log(res.data)
+                            if (res.status === "200" && res.data.status === "SUCCESS") {
+                                this.setState({
+                                    otpGenInit: true
+                                })
+                            } else {
+                                alert(res.data.message)
+                            }
+                        }
+                    }).catch(err => {
+                        alert('Error in payment', err)
+                    })
+                }
             }
             else {
             }
@@ -101,7 +145,7 @@ export class Payment extends Component {
     handleVerifyOTP() {
         axios.get(`${url.url}/otpVerification/${this.state.otp}`)
             .then(res => {
-                console.log("otp evrified successfully")
+                console.log("otp verified successfully")
                 alert('OTP verified successfully')
             }).catch((err) => {
                 alert("OTP error", err)
@@ -127,7 +171,7 @@ export class Payment extends Component {
                     resolve(res)
                 }).catch((err) => {
                     reject(err);
-                    alert("Error in search", err)
+                    alert("Error in paymenr", err)
                 })
 
         })
@@ -198,17 +242,32 @@ export class Payment extends Component {
                                     id="creditCardNumber"
                                     onChange={this.handleChange} />
                             </div>
-                            <span className="pull-right text-danger"><small>{this.state.expiryDateError}</small></span>
-                            <div className="form-group ">
-                                <label htmlFor="expiryDate">Expiry Date  </label><br></br>
-                                <input
-                                    className="form-control"
-                                    type="text"
-                                    id="expiryDate"
-                                    value={this.state.expiryDate}
-                                    onChange={this.handleChange}
-                                />
+                            <div className="form-group row">
+                                {/* <span className="pull-right text-danger"><small>{this.state.expiryDateError}</small></span> */}
+                                <div className="col-sm-3">
+                                    <label htmlFor="expiryDateMonth">Expiry Date Month </label><br></br>
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="expiryDateYear"
+                                        value={this.state.expiryDateMonth}
+                                        onChange={this.handleChange}
+                                    />
+                                </div> 
+                                <h3>/</h3>
+                                {/* <span className="pull-right text-danger"><small>{this.state.expiryDateError}</small></span> */}
+                                <div className="col-sm-6">
+                                    <label htmlFor="expiryDateYear">Expiry Date year </label><br></br>
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="expiryDateYear"
+                                        value={this.state.expiryDateYear}
+                                        onChange={this.handleChange}
+                                    />
+                                </div>
                             </div>
+
                             <span className="pull-right text-danger"><small>{this.state.cvvError}</small></span>
                             <div className="form-group ">
                                 <label htmlFor="cvv">cvv  </label><br></br>
@@ -233,8 +292,27 @@ export class Payment extends Component {
                             <br></br><br></br>
                             <div className="form-group col-xs-2 ">
                                 <button type="submit" id="searchsubmit" className="btn btn-primary" onClick={this.handleSubmit}  >Make Payment</button>&nbsp;&nbsp;
+                                <br></br><br></br>
                             </div>
+                            {
+                                this.state.otpGenInit ? (
+                                    <div>
+                                        <label htmlFor="reason">Enter the received OTP </label><br></br>
+                                        <input name=""
+                                            className="form-control"
+                                            type="password"
+                                            id="otp"
+                                            value={this.state.otp}
+                                            onChange={this.handleChange}
+                                        />
+                                        <br></br><br></br>
+                                        <button type="submit" id="searchsubmit" className="btn btn-primary" onClick={this.handleVerifyOTP}  >Verify</button>&nbsp;&nbsp;
+                                </div>) : (
+                                        <div>
 
+                                        </div>
+                                    )
+                            }
                         </form>
                     </div>
                 }

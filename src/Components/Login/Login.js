@@ -51,11 +51,10 @@ export class Login extends Component {
                 this.getData(user).then((res)=>{
                     if(res){
                         console.log(res.data)
-                        
+                        localStorage.setItem('userId',res.data.userId)
                         this.props.history.push({
                             pathname: '/accountSummary',
                             search: '?query=accountSummary',
-                            state:{data: res.data.userId}
                         })
                     }
                 }).catch(err=>{

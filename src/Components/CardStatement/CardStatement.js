@@ -25,10 +25,13 @@ export class CardStatement extends Component {
         this.formatDate()
     }
     getStatement() {
+        let userId= localStorage.getItem('userId')
+        console.log("Userid inside statement", userId)
         const reqDetails={
             fromDate: this.state.transactionFromDate,
             toDate: this.state.transactionToDate,
-            creditCardNumber: this.state.cardNo
+            creditCardNumber: this.state.cardNo,
+            userId: userId
         }
         this.validate().then(isValid => {
             if (isValid) {

@@ -18,7 +18,10 @@ h1{
     margin-left:40%;
     text-align: left;
 }
-
+.row{
+    position: relative;
+    margin-left:40%;
+}
 table{
     font-size:15px;
     font-weight: bold;
