@@ -1,0 +1,13 @@
+.App {
+  text-align: center;
+  font-family:  Arial;
+  font-size: 12 evm;
+}
+
+body{
+  background-color: lightgrey;
+}
+.App-link {
+  color: #61dafb;
+}
+

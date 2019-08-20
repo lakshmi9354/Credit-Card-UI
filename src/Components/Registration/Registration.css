@@ -1,0 +1,28 @@
+h1{
+    color: blue;
+}
+
+.headingregister{
+    margin-top: 2%;
+    text-align:center;
+}
+.registerform{
+    position: relative;
+    margin-top:5%;
+    margin-left:30%;
+    width: 40%;
+    height: 60%;
+    border: solid 1px orangered;
+    padding: 20px;
+    
+}   
+input{
+    font-weight: bold;
+}
+
+.registerButton{
+    margin-left:40%;
+}
+span{
+    color:red;
+}

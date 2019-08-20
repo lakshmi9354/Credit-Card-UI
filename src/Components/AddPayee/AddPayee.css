@@ -1,0 +1,35 @@
+h1{
+    color: orangered
+}
+
+.headingpayee{
+    margin-top: 5%;
+    text-align:center;
+    color:orangered;
+}
+.searchProfileform{
+    position: relative;
+    margin-top:15%;
+    margin-left:35%;
+    
+}
+.addPayeeButton{
+    margin-left:40%;
+    text-align: left;
+}
+
+table{
+    font-size:15px;
+    font-weight: bold;
+    margin-left: 10%;
+    border: solid;
+    width:80%;
+    text-align: center;
+}
+table th{
+    color: orangered;
+}
+table tr td{
+    border: 1px solid;
+    text-align: center;
+}

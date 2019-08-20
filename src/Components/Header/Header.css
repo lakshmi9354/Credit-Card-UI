@@ -1,0 +1,40 @@
+.header{
+    padding: 10px;
+    height : 100px;
+    width:100%;
+    text-align: left;
+    box-sizing: border-box;
+    background-color: orange;
+    color: white;
+}
+/* body{
+    background: url('../../Assets/Images/background.jpg') no-repeat ;
+    background-size: cover;
+} */
+.headingING{
+    text-align: center;
+    color: black;
+    margin-top:1px;
+
+}
+.INGLogo{
+    height : 100%;
+    float: left;
+}
+
+
+.login{
+    float: right;
+    height: 100%;
+    width: 7%;
+    height: 70%;
+    margin-top: 1%;
+    text-align: center;
+    background-color:lightgrey;
+    color: black;
+}
+
+.registerdiv{
+    margin-top:10%;
+    margin-left:35%;
+}

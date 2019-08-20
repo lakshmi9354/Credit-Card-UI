@@ -1,0 +1,18 @@
+.left{
+    float:left
+}
+h1{
+    top:20%;
+    margin-left:0
+}
+.headingfund{
+    margin-left:30%;
+}
+.fundtransferform{
+    position: relative;
+    margin-top:50px;
+    margin-left:8%;
+    width:80%;
+    left:1%;
+    padding:20px;
+}

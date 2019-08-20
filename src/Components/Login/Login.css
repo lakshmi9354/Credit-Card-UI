@@ -1,0 +1,12 @@
+.headinglogin{
+    color: orangered;
+}
+.loginform{
+    position: relative;
+    margin-top:5%;
+    margin-left:30%;
+    width: 40%;
+    height: 60%;
+    border: solid 1px orangered;
+    padding: 20px;
+}

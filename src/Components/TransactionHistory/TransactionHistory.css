@@ -1,0 +1,20 @@
+.txnheading{
+    text-align: center;
+}
+.tableheading{
+    color: white
+}
+.datarow{
+    text-align: left
+}
+.historyTable{
+    width:60%;
+}
+.tab{
+    float:left;
+}
+.historyheading{
+    top:200px;
+    float:center;
+    color: orangered;
+}
